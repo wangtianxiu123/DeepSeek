@@ -9,16 +9,16 @@ if 'api_key' not in st.session_state:
     st.session_state.api_key = None
 
 # Function to call DeepSeek API
-def call_deepseek_api(prompt, api_key):
+def call_deepseek_api(messages, api_key):
     headers = {
         'Authorization': f'Bearer {api_key}',
         'Content-Type': 'application/json'
     }
     data = {
-        'prompt': prompt,
+        'messages': messages,
         'model': 'DeepSeek-R1'
     }
-    response = requests.post('https://api.deepseek.com/v1/chat', headers=headers, json=data)
+    response = requests.post('https://api.deepseek.com/v1/chat/completions', headers=headers, json=data)
     return response.json()
 
 # Function to handle input focus
@@ -42,9 +42,9 @@ else:
             st.session_state.conversation.append({"role": "user", "content": user_input})
             st.session_state.user_input_focus = False
             
-            # Call the API
+            # Call the API with the full conversation history
             with st.spinner("Thinking..."):
-                response = call_deepseek_api(user_input, st.session_state.api_key)
+                response = call_deepseek_api(st.session_state.conversation, st.session_state.api_key)
                 thought_process = response.get('thought_process', '...')
                 reply = response.get('reply', '...')
             
