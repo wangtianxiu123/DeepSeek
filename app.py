@@ -19,7 +19,7 @@ def call_deepseek_api(messages, api_key):
         'model': 'DeepSeek-R1'
     }
     response = requests.post('https://api.deepseek.com/v1/chat/completions', headers=headers, json=data)
-    return response.json()
+    return response
 
 # Function to handle input focus
 def set_user_input_focus():
@@ -46,12 +46,24 @@ else:
             with st.spinner("Thinking..."):
                 response = call_deepseek_api(st.session_state.conversation, st.session_state.api_key)
                 
-                # 解析API响应，获取AI的回复内容
-                try:
-                    ai_message = response['choices'][0]['message']['content']
-                except (KeyError, IndexError):
-                    ai_message = "抱歉，无法获取AI的回复。请检查API响应格式。"
-            
+                # 检查响应状态码
+                if response.status_code == 200:
+                    try:
+                        json_response = response.json()
+                        # 解析API响应，获取AI的回复内容
+                        ai_message = json_response['choices'][0]['message']['content']
+                    except (KeyError, IndexError, ValueError) as e:
+                        ai_message = f"抱歉，无法解析AI的回复。错误: {str(e)}"
+                        st.error(f"API响应解析错误: {str(e)}")
+                else:
+                    # 显示错误状态码和响应内容
+                    ai_message = f"抱歉，API请求失败。状态码: {response.status_code}"
+                    try:
+                        error_content = response.json()
+                        st.error(f"API错误信息: {error_content}")
+                    except ValueError:
+                        st.error(f"API未返回JSON格式的错误信息。响应内容: {response.text}")
+                
             # Append AI's reply to conversation
             st.session_state.conversation.append({"role": "ai", "content": ai_message})
     
@@ -66,6 +78,6 @@ else:
     # Clear conversation button
     if st.button("Clear Conversation"):
         st.session_state.conversation = []
-
+    
     # 移除多余的 text_input，避免重复键错误
     # 如果需要实现自动聚焦，可以考虑使用自定义组件或其他方法 
