@@ -30,12 +30,12 @@ st.title("Chat with DeepSeek-R1")
 
 # Prompt for API key if not set
 if st.session_state.api_key is None:
-    api_key = st.text_input("Enter your API Key to start chatting", type="password")
+    api_key = st.text_input("Enter your API Key to start chatting", type="password", key="api_key_input")
     if st.button("Submit API Key"):
         if api_key:
             st.session_state.api_key = api_key
 else:
-    user_input = st.text_input("You: ", key="user_input", on_change=set_user_input_focus)
+    user_input = st.text_input("You: ", key="user_input_main", on_change=set_user_input_focus)
     if st.button("Send") or st.session_state.get('user_input_focus', False):
         if user_input:
             # Append user input to conversation
@@ -66,4 +66,4 @@ else:
         st.session_state.conversation = []
 
     # Auto-focus on input box
-    st.text_input("You: ", key="user_input", on_change=set_user_input_focus) 
+    st.text_input("You: ", key="user_input_focus", on_change=set_user_input_focus) 
