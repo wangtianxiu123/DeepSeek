@@ -45,21 +45,23 @@ else:
             # Call the API with the full conversation history
             with st.spinner("Thinking..."):
                 response = call_deepseek_api(st.session_state.conversation, st.session_state.api_key)
-                thought_process = response.get('thought_process', '...')
-                reply = response.get('reply', '...')
+                
+                # 解析API响应，获取AI的回复内容
+                try:
+                    ai_message = response['choices'][0]['message']['content']
+                except (KeyError, IndexError):
+                    ai_message = "抱歉，无法获取AI的回复。请检查API响应格式。"
             
-            # Simulate thought process
-            st.session_state.conversation.append({"role": "ai", "content": f"Thinking: {thought_process}"})
-            time.sleep(2)  # Simulate delay for thought process
-            st.session_state.conversation.append({"role": "ai", "content": reply})
-
+            # Append AI's reply to conversation
+            st.session_state.conversation.append({"role": "ai", "content": ai_message})
+    
     # Display conversation
     st.markdown("### Conversation")
     for message in st.session_state.conversation:
         if message['role'] == 'user':
-            st.write(f"You: {message['content']}")
+            st.write(f"**You:** {message['content']}")
         else:
-            st.write(f"AI: {message['content']}")
+            st.write(f"**AI:** {message['content']}")
 
     # Clear conversation button
     if st.button("Clear Conversation"):
