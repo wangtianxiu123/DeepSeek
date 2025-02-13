@@ -65,5 +65,5 @@ else:
     if st.button("Clear Conversation"):
         st.session_state.conversation = []
 
-    # Auto-focus on input box
-    st.text_input("You: ", key="user_input_focus", on_change=set_user_input_focus) 
+    # 移除多余的 text_input，避免重复键错误
+    # 如果需要实现自动聚焦，可以考虑使用自定义组件或其他方法 
